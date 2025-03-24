@@ -10,6 +10,6 @@ def index():
     return render_template("index.html", email_content=email_content)
 
 if __name__ == "__main__":
+    import os  # 確保這行被正確縮排
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
-
