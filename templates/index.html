@@ -3,16 +3,17 @@
 <head>
     <meta charset="utf-8">
     <title>Netflix 自助驗證📩</title>
+    <link rel="icon" href="{{ url_for('static', filename='logo.png') }}">
 </head>
 <body>
-    <div style="display: flex; align-items: center; gap: 10px;">
-        <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" style="height: 50px;">
-        <h1>Netflix 自助驗證📩</h1>
-    </div>
-
+    <h1><img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" style="height: 30px; vertical-align: middle;"> Netflix 自助驗證📩</h1>
+    
     {% for email in emails %}
         <hr>
         <div style="border:1px solid #ccc; padding:10px; margin:10px 0;">
+            {% if loop.index0 == 0 %}
+                <div style="color: red; font-weight: bold;">🆕 最新郵件</div>
+            {% endif %}
             {{ email|safe }}
         </div>
     {% endfor %}
