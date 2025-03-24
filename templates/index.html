@@ -1,11 +1,16 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Netflix 信件內容</title>
+    <meta charset="utf-8">
+    <title>Netflix 郵件查看器</title>
 </head>
 <body>
-    <h2>📩 Netflix 最新郵件</h2>
-    <pre>{{ email_content }}</pre>  <!-- <pre> 讓格式不會亂掉 -->
+    <h1>📩 Netflix 最新郵件</h1>
+    {% for email in emails %}
+        <hr>
+        <div style="border:1px solid #ccc; padding:10px; margin:10px 0;">
+            {{ email|safe }}
+        </div>
+    {% endfor %}
 </body>
 </html>
