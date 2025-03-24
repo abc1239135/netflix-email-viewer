@@ -1,30 +1,26 @@
 from googleapiclient.discovery import build
 from google.oauth2.credentials import Credentials
 import base64
+import email
 import json
 import os
 
 SCOPES = ["https://www.googleapis.com/auth/gmail.readonly"]
 
 def get_gmail_service():
-    """建立 Gmail API 服務，從環境變數讀取 credentials.json"""
-    
-    # 嘗試從 GOOGLE_CREDENTIALS 讀取
-    credentials_json = os.getenv("GOOGLE_CREDENTIALS")
-    
-    # 如果 GOOGLE_CREDENTIALS 沒有，嘗試從 Base64 變數讀取
-    if not credentials_json:
-        credentials_base64 = os.getenv("GOOGLE_CREDENTIALS_BASE64")
-        if credentials_base64:
-            credentials_json = base64.b64decode(credentials_base64).decode("utf-8")
-    
-    if not credentials_json:
-        raise Exception("❌ 找不到環境變數 GOOGLE_CREDENTIALS 或 GOOGLE_CREDENTIALS_BASE64，請確認已設定！")
+    """建立 Gmail API 服務，從環境變數載入 base64 編碼的 token.json"""
+    encoded = os.getenv("GOOGLE_CREDENTIALS_BASE64")
 
-    creds_dict = json.loads(credentials_json)
-    creds = Credentials.from_authorized_user_info(creds_dict, SCOPES)
+    if not encoded:
+        raise Exception("❌ 找不到環境變數 GOOGLE_CREDENTIALS_BASE64，請確認已設定！")
 
-    return build("gmail", "v1", credentials=creds)
+    try:
+        decoded_json = base64.b64decode(encoded).decode("utf-8")
+        creds_dict = json.loads(decoded_json)
+        creds = Credentials.from_authorized_user_info(info=creds_dict, scopes=SCOPES)
+        return build("gmail", "v1", credentials=creds)
+    except Exception as e:
+        raise Exception(f"❌ GOOGLE_CREDENTIALS_BASE64 解碼失敗或格式錯誤：{e}")
 
 def get_latest_netflix_email():
     """抓取 Netflix 最新信件的完整內容"""
@@ -39,13 +35,13 @@ def get_latest_netflix_email():
 
     # 取得郵件內容
     message = service.users().messages().get(userId="me", id=messages[0]["id"]).execute()
-    payload = message.get("payload", {})
+    payload = message["payload"]
 
     # 解碼郵件內容
     email_text = "⚠️ 無法讀取郵件內容"
     if "parts" in payload:
         for part in payload["parts"]:
-            if part["mimeType"] == "text/plain":  # 取得純文字版本
+            if part["mimeType"] == "text/plain":
                 body_data = part["body"]["data"]
                 email_text = base64.urlsafe_b64decode(body_data).decode("utf-8")
 
