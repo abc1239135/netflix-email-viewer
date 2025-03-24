@@ -1,26 +1,23 @@
 from googleapiclient.discovery import build
-from google_auth_oauthlib.flow import InstalledAppFlow
+from google.oauth2.credentials import Credentials
 import base64
 import email
-import os
 import json
+import os
 
 SCOPES = ["https://www.googleapis.com/auth/gmail.readonly"]
 
 def get_gmail_service():
-    """建立 Gmail API 服務，從環境變數讀取憑證"""
-    credentials_json = os.getenv("GMAIL_CREDENTIALS")
+    """建立 Gmail API 服務，從環境變數讀取 credentials.json"""
+    credentials_json = os.getenv("GOOGLE_CREDENTIALS")
     
     if not credentials_json:
-        raise ValueError("❌ 環境變數 GMAIL_CREDENTIALS 未設定")
+        raise Exception("❌ 找不到環境變數 GOOGLE_CREDENTIALS，請確認已設定！")
 
-    credentials_dict = json.loads(credentials_json)
-
-    flow = InstalledAppFlow.from_client_config(credentials_dict, SCOPES)
-    creds = flow.run_local_server(port=0)
-    service = build("gmail", "v1", credentials=creds)
-
-    return service
+    creds_dict = json.loads(credentials_json)
+    creds = Credentials.from_authorized_user_info(creds_dict, SCOPES)
+    
+    return build("gmail", "v1", credentials=creds)
 
 def get_latest_netflix_email():
     """抓取 Netflix 最新信件的完整內容"""
