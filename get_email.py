@@ -2,18 +2,23 @@ from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 import base64
 import email
+import os
+import json
 
 SCOPES = ["https://www.googleapis.com/auth/gmail.readonly"]
 
 def get_gmail_service():
-    """建立 Gmail API 服務"""
-    flow = InstalledAppFlow.from_client_secrets_file("credentials.json", SCOPES)
+    """建立 Gmail API 服務，從環境變數讀取憑證"""
+    credentials_json = os.getenv("GMAIL_CREDENTIALS")
+    
+    if not credentials_json:
+        raise ValueError("❌ 環境變數 GMAIL_CREDENTIALS 未設定")
+
+    credentials_dict = json.loads(credentials_json)
+
+    flow = InstalledAppFlow.from_client_config(credentials_dict, SCOPES)
     creds = flow.run_local_server(port=0)
     service = build("gmail", "v1", credentials=creds)
-    
-    # 儲存授權資訊
-    with open("token.json", "w") as token_file:
-        token_file.write(creds.to_json())
 
     return service
 
