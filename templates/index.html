@@ -3,19 +3,28 @@
 <head>
     <meta charset="utf-8">
     <title>Netflix 自助驗證📩</title>
-    <link rel="icon" href="{{ url_for('static', filename='logo.png') }}">
 </head>
 <body>
-    <h1><img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" style="height: 30px; vertical-align: middle;"> Netflix 自助驗證📩</h1>
-    
+    <h1>
+        <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" id="logo" style="height: 40px; vertical-align: middle; cursor: pointer;">
+        Netflix 自助驗證📩
+    </h1>
+
     {% for email in emails %}
         <hr>
         <div style="border:1px solid #ccc; padding:10px; margin:10px 0;">
-            {% if loop.index0 == 0 %}
-                <div style="color: red; font-weight: bold;">🆕 最新郵件</div>
+            {% if loop.index == 1 %}
+                <strong style="color: green;">✅ 最新郵件</strong><br>
             {% endif %}
             {{ email|safe }}
         </div>
     {% endfor %}
+
+    <script>
+        // 點擊 logo 時重新整理頁面
+        document.getElementById("logo").addEventListener("click", function() {
+            location.reload();
+        });
+    </script>
 </body>
 </html>
