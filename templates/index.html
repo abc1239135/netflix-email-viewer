@@ -2,27 +2,64 @@
 <html>
 <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Netflix 自助驗證📩</title>
+    <style>
+        body {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 1em;
+            font-family: Arial, sans-serif;
+            overflow-x: hidden;
+        }
+        .email-box {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin: 10px 0;
+            word-wrap: break-word;
+        }
+        .latest-label {
+            font-weight: bold;
+            color: green;
+        }
+        .warning-text {
+            color: red;
+            font-size: 0.9em;
+            display: inline-block;
+            margin-left: 10px;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+        a {
+            word-break: break-word;
+        }
+    </style>
 </head>
-<body style="font-family: Arial, sans-serif;">
+<body>
     <h1>
-        <a href="/" style="text-decoration: none; color: black;">
-            <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" style="height: 40px; vertical-align: middle;">
+        <a href="/" style="text-decoration: none; color: inherit;">
+            <img src="/static/logo.png" alt="Logo" style="height: 30px; vertical-align: middle;">
             Netflix 自助驗證📩
         </a>
     </h1>
-    {% for item in emails %}
-        <hr>
-        <div style="border:1px solid #ccc; padding:10px; margin:10px 0;">
-            {% if loop.index0 == 0 %}
-                <h3>✅ 最新郵件 
-                    <span style="color: red;">
-                        （郵件只會存放5分鐘，請在時間內驗證，如電視登入有顯示我在旅行選項請先選擇正在旅行並每14天收取驗證碼）
-                    </span>
-                </h3>
-            {% endif %}
-            {{ item.content|safe }}
-        </div>
-    {% endfor %}
+
+    {% if emails %}
+        {% for email in emails %}
+            <hr>
+            <div class="email-box">
+                {% if loop.index0 == 0 %}
+                    <div class="latest-label">✅ 最新郵件
+                        <span class="warning-text">（郵件只會存放5分鐘，請在時間內驗證，如電視登入有顯示我在旅行選項請先選擇正在旅行並每14天收取驗證碼）</span>
+                    </div>
+                    <br>
+                {% endif %}
+                {{ email|safe }}
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>📭 目前沒有郵件</p>
+    {% endif %}
 </body>
 </html>
