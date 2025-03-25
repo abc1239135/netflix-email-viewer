@@ -4,27 +4,25 @@
     <meta charset="utf-8">
     <title>Netflix 自助驗證📩</title>
 </head>
-<body>
+<body style="font-family: Arial, sans-serif;">
     <h1>
-        <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" id="logo" style="height: 40px; vertical-align: middle; cursor: pointer;">
-        Netflix 自助驗證📩
+        <a href="/" style="text-decoration: none; color: black;">
+            <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" style="height: 40px; vertical-align: middle;">
+            Netflix 自助驗證📩
+        </a>
     </h1>
-
-    {% for email in emails %}
+    {% for item in emails %}
         <hr>
         <div style="border:1px solid #ccc; padding:10px; margin:10px 0;">
-            {% if loop.index == 1 %}
-                <strong style="color: green;">✅ 最新郵件</strong><br>
+            {% if loop.index0 == 0 %}
+                <h3>✅ 最新郵件 
+                    <span style="color: red;">
+                        （郵件只會存放5分鐘，請在時間內驗證，如電視登入有顯示我在旅行選項請先選擇正在旅行並每14天收取驗證碼）
+                    </span>
+                </h3>
             {% endif %}
-            {{ email|safe }}
+            {{ item.content|safe }}
         </div>
     {% endfor %}
-
-    <script>
-        // 點擊 logo 時重新整理頁面
-        document.getElementById("logo").addEventListener("click", function() {
-            location.reload();
-        });
-    </script>
 </body>
 </html>
