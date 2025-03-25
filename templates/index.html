@@ -3,64 +3,72 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Netflix 自助驗證📩</title>
+    <title>📩 Netflix 自助驗證</title>
     <style>
         body {
+            font-family: Arial, sans-serif;
+            padding: 1em;
+            margin: 0;
+            background-color: #f9f9f9;
+        }
+        .container {
             max-width: 800px;
             margin: 0 auto;
+            background: white;
             padding: 1em;
-            font-family: Arial, sans-serif;
-            overflow-x: hidden;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            border-radius: 10px;
+        }
+        h1 {
+            font-size: 1.5em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .latest-label {
+            font-weight: bold;
+            margin-top: 1em;
+        }
+        .red-text {
+            color: red;
+            font-size: 0.9em;
         }
         .email-box {
             border: 1px solid #ccc;
             padding: 10px;
             margin: 10px 0;
-            word-wrap: break-word;
+            overflow-x: auto;
         }
-        .latest-label {
-            font-weight: bold;
-            color: green;
-        }
-        .warning-text {
-            color: red;
-            font-size: 0.9em;
-            display: inline-block;
-            margin-left: 10px;
-        }
-        img {
-            max-width: 100%;
-            height: auto;
-        }
-        a {
-            word-break: break-word;
+        .logo {
+            height: 32px;
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
-    <h1>
-        <a href="/" style="text-decoration: none; color: inherit;">
-            <img src="/static/logo.png" alt="Logo" style="height: 30px; vertical-align: middle;">
-            Netflix 自助驗證📩
-        </a>
-    </h1>
+    <div class="container">
+        <h1>
+            <a href="/">
+                <img src="/static/logo.png" alt="Logo" class="logo">
+            </a>
+            Netflix 自助驗證 📩
+        </h1>
 
-    {% if emails %}
-        {% for email in emails %}
-            <hr>
-            <div class="email-box">
-                {% if loop.index0 == 0 %}
-                    <div class="latest-label">✅ 最新郵件
-                        <span class="warning-text">（郵件只會存放5分鐘，請在時間內驗證，如電視登入有顯示我在旅行選項請先選擇正在旅行並每14天收取驗證碼）</span>
-                    </div>
-                    <br>
-                {% endif %}
-                {{ email|safe }}
-            </div>
-        {% endfor %}
-    {% else %}
-        <p>📭 目前沒有郵件</p>
-    {% endif %}
+        <div class="latest-label">
+            ✅ 最新郵件
+            <span class="red-text">（郵件只會存放5分鐘，請在時間內驗證，如電視登入有顯示我在旅行選項請先選擇正在旅行並每14天收取驗證碼）</span>
+        </div>
+
+        {% if emails %}
+            {% for email in emails %}
+                <div class="email-box">
+                    {{ email|safe }}
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>📭 目前沒有郵件</p>
+        {% endif %}
+    </div>
 </body>
 </html>
-
