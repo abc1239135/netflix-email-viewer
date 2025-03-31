@@ -8,6 +8,10 @@ from datetime import datetime, timedelta
 
 SCOPES = ["https://www.googleapis.com/auth/gmail.readonly"]
 
+# 紀錄已讀信件的 cache（記憶體內，5 分鐘自動移除）
+email_cache = {}
+
+
 def get_gmail_service():
     token_base64 = os.getenv("TOKEN_JSON_BASE64")
     if not token_base64:
@@ -21,38 +25,35 @@ def get_gmail_service():
     except Exception as e:
         raise Exception(f"❌ token.json 解碼或建立 Credentials 失敗：{e}")
 
+
 def get_latest_netflix_emails():
     service = get_gmail_service()
-    senders = [
-        ("Netflix", "no-reply@netflix.com"),
-        ("Disney+", "account@disneyplus.com")
-    ]
-    
+    query = 'from:(no-reply@netflix.com OR disneyplus@trx.mail2.disneyplus.com)'
+    results = service.users().messages().list(userId="me", q=query, maxResults=10).execute()
+    messages = results.get("messages", [])
+
+    # 移除超過 5 分鐘的快取信件
     now = datetime.utcnow()
-    cutoff = now - timedelta(minutes=5)
-    all_emails = []
+    expired_ids = [msg_id for msg_id, timestamp in email_cache.items() if now - timestamp > timedelta(minutes=5)]
+    for msg_id in expired_ids:
+        del email_cache[msg_id]
 
-    for platform, sender in senders:
-        results = service.users().messages().list(
-            userId="me", q=f"from:{sender}", maxResults=3
-        ).execute()
+    emails = []
+    for message_meta in messages:
+        msg_id = message_meta["id"]
 
-        messages = results.get("messages", [])
-        for msg in messages:
-            full_msg = service.users().messages().get(userId="me", id=msg["id"], format="full").execute()
-            internal_date = int(full_msg.get("internalDate", 0)) / 1000
-            msg_time = datetime.utcfromtimestamp(internal_date)
+        # 已經過期的快取信件不處理
+        if msg_id in email_cache:
+            continue
 
-            if msg_time < cutoff:
-                continue  # 跳過超過 5 分鐘的信件
-
-            payload = full_msg["payload"]
+        try:
+            message = service.users().messages().get(userId="me", id=msg_id, format="full").execute()
+            payload = message.get("payload", {})
             email_html = "⚠️ 無法讀取郵件內容"
 
-            # 嘗試抓取 HTML 格式
             if "parts" in payload:
                 for part in payload["parts"]:
-                    if part["mimeType"] == "text/html":
+                    if part.get("mimeType") == "text/html":
                         body_data = part["body"].get("data")
                         if body_data:
                             email_html = base64.urlsafe_b64decode(body_data).decode("utf-8")
@@ -61,12 +62,10 @@ def get_latest_netflix_emails():
                 if body_data:
                     email_html = base64.urlsafe_b64decode(body_data).decode("utf-8")
 
-            all_emails.append({
-                "content": email_html,
-                "timestamp": msg_time,
-                "platform": platform
-            })
+            emails.append(email_html)
+            email_cache[msg_id] = now
 
-    # 按照時間排序（新 → 舊）
-    sorted_emails = sorted(all_emails, key=lambda e: e["timestamp"], reverse=True)
-    return sorted_emails
+        except Exception as e:
+            print(f"❌ 無法讀取郵件 {msg_id}：{e}")
+
+    return emails[:3] if emails else []
